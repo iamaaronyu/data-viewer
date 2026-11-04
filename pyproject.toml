@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "data-viewer"
+version = "0.1.0"
+description = "本地只读数据查看器：Lance / Parquet / CSV / JSON(L) / Arrow / Feather / HDF5 / WebDataset"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "duckdb>=1.1",
+    "pyarrow>=17",
+    "pylance>=0.20",
+    "h5py>=3.10",
+    "numpy>=1.26",
+    "pillow>=10",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "httpx>=0.27"]
+
+[project.scripts]
+data-viewer = "data_viewer.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["data_viewer*"]
+
+[tool.setuptools.package-data]
+data_viewer = ["static/*", "static/**/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
