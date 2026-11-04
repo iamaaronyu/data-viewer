@@ -21,13 +21,14 @@ def sql_ident(name: str) -> str:
 
 
 def fetch_arrow(cursor) -> pa.Table:
-    """Fetch the pending DuckDB result as a pyarrow Table (works across DuckDB versions)."""
-    res = cursor.arrow()
-    if isinstance(res, pa.Table):
-        return res
-    if hasattr(res, "read_all"):
-        return res.read_all()
-    return cursor.fetch_arrow_table()
+    """Fetch the pending DuckDB result as a pyarrow Table (works across DuckDB versions).
+
+    ``to_arrow_table()`` exists in recent 1.x releases and in 2.x; DuckDB 2.0 removed
+    ``arrow()`` and ``fetch_arrow_table()``, which older releases still need.
+    """
+    fetch = getattr(cursor, "to_arrow_table", None) or cursor.fetch_arrow_table
+    res = fetch()
+    return res if isinstance(res, pa.Table) else res.read_all()
 
 
 def human_size(n: int | float | None) -> str:

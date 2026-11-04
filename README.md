@@ -83,6 +83,7 @@ UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple uv pip install --python .v
 - 压缩的 WebDataset 分片（`.tar.gz` 等）随机读取较慢；建议使用未压缩的 `.tar`。
 - HEIC 图片无法预览；视频能否播放取决于浏览器的解码能力（MP4 / WebM 最稳妥）。
 - 大于 1M 行的数据，唯一值是 HyperLogLog 估计值（界面上标为“≈”）。
+- DuckDB 暂时锁定在 1.x：DuckDB 2.0 会把二进制列、定长向量列和结构体子字段上的过滤条件下推给 Lance，而 Lance 不支持这类下推，查询会直接报错。
 
 ## 开发
 
