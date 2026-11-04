@@ -289,6 +289,8 @@ def create_app(config: AppConfig) -> FastAPI:
             d["lance"] = {"version": src.ds.version, "latest_version": _safe(lambda: src.ds.latest_version)}  # type: ignore[attr-defined]
         if src.format == "hdf5":
             d["hdf5"] = {"node": src.node, "node_kind": src.node_kind}  # type: ignore[attr-defined]
+        from .embodied import supports_trajectory
+        d["views"] = ["trajectory"] if supports_trajectory(src.path,src.format,schema.names) else []
         return d
 
     def make_page(src: Source, table: pa.Table, mode: str, offset: int, has_more: bool, elapsed: float,
@@ -576,6 +578,9 @@ def create_app(config: AppConfig) -> FastAPI:
         else:
             info["too_large"] = True
         return JSONResponse(info)
+
+    from .embodied import router as embodied_router
+    app.include_router(embodied_router(root))
 
     # -- static UI ---------------------------------------------------------
     if STATIC_DIR.is_dir():

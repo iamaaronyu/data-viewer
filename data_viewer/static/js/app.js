@@ -6,6 +6,7 @@ import { Drawer } from './grid.js';
 import { InfoView, SchemaView } from './infoview.js';
 import { SqlView } from './sqlview.js';
 import { StatsView } from './statsview.js';
+import { TrajectoryView } from './trajectoryview.js';
 import { $, clear, el, errorBox, fmtBytes, fmtInt, noteBox, spinner, toast } from './util.js';
 
 const FORMATS = [
@@ -16,6 +17,7 @@ const FORMATS = [
   ['Arrow / Feather', 'IPC 文件、IPC 流、Feather V1/V2'],
   ['HDF5', '组和数据集按表格查看，图像数组直接预览'],
   ['WebDataset', 'tar 分片，同名文件组成一个样本'],
+  ['RLDS / TFRecord', '机器人逐帧观测与动作，支持轨迹视图'],
 ];
 
 class App {
@@ -30,6 +32,7 @@ class App {
     this.statsView = new StatsView($('#panel-stats'), this);
     this.sqlView = new SqlView($('#panel-sql'), this);
     this.infoView = new InfoView($('#panel-info'), this);
+    this.trajectoryView = new TrajectoryView($('#panel-trajectory'), this);
     this.browser = new FileBrowser({
       list: $('#fs-list'), filter: $('#fs-filter'), banner: $('#dir-banner'), foot: $('#side-foot'),
       onOpen: (path, format) => this.go({ open: path, format }),
@@ -156,6 +159,7 @@ class App {
   }
 
   show(which) {
+    this.trajectoryView.stop();
     $('#welcome').hidden = which !== 'welcome';
     $('#source').hidden = which !== 'source';
     $('#preview').hidden = which !== 'preview';
@@ -231,7 +235,9 @@ class App {
     $('#src-meta').replaceChildren(spinner('正在打开…'));
     clear($('#src-warnings'));
     clear($('#src-switch'));
-    ['data', 'schema', 'stats', 'sql', 'info'].forEach((t) => { $(`#panel-${t}`).hidden = t !== 'data'; });
+    this.trajectoryView.stop();
+    document.querySelector('#tabs [data-tab="trajectory"]').hidden = true;
+    ['data', 'trajectory', 'schema', 'stats', 'sql', 'info'].forEach((t) => { $(`#panel-${t}`).hidden = t !== 'data'; });
     document.querySelectorAll('#tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === 'data')));
     clear($('#panel-data'));
     let desc;
@@ -258,6 +264,8 @@ class App {
     this.infoView.reset();
     this.sqlView.reset(desc);
     this.dataView.reset(desc);
+    this.trajectoryView.reset(desc);
+    document.querySelector('#tabs [data-tab="trajectory"]').hidden = !(desc.views || []).includes('trajectory');
     this.setTab(tab || 'data');
     this.pollCount();
   }
@@ -346,12 +354,15 @@ class App {
   }
 
   setTab(tab, updateHash = false) {
-    if (!['data', 'schema', 'stats', 'sql', 'info'].includes(tab)) tab = 'data';
+    if (!['data', 'trajectory', 'schema', 'stats', 'sql', 'info'].includes(tab)) tab = 'data';
+    if (tab === 'trajectory' && !(this.source?.views || []).includes('trajectory')) tab = 'data';
+    if (tab !== 'trajectory') this.trajectoryView.stop();
     this.tab = tab;
     document.querySelectorAll('#tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
-    ['data', 'schema', 'stats', 'sql', 'info'].forEach((t) => { $(`#panel-${t}`).hidden = t !== tab; });
+    ['data', 'trajectory', 'schema', 'stats', 'sql', 'info'].forEach((t) => { $(`#panel-${t}`).hidden = t !== tab; });
     if (tab !== 'data' && tab !== 'sql') this.drawer.hide();
     if (!this.source) return;
+    if (tab === 'trajectory') this.trajectoryView.activate();
     if (tab === 'schema') this.schemaView.activate();
     if (tab === 'stats') this.statsView.activate();
     if (tab === 'sql') this.sqlView.activate();

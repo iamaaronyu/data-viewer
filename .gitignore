@@ -6,6 +6,7 @@ __pycache__/
 build/
 dist/
 samples/
+_extensions/
 .DS_Store
 
 # 本机专用：Claude 桌面版预览配置（含绝对路径）和个人权限设置

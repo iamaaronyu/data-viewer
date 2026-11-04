@@ -14,6 +14,7 @@ FORMAT_LABELS = {
     "arrow": "Arrow",
     "hdf5": "HDF5",
     "webdataset": "WebDataset",
+    "rlds": "RLDS / TFRecord",
 }
 
 _FILE_SUFFIXES: list[tuple[tuple[str, ...], str]] = [
@@ -27,6 +28,9 @@ _FILE_SUFFIXES: list[tuple[tuple[str, ...], str]] = [
 
 
 def detect_file(name: str) -> str | None:
+    from ..embodied import is_rlds
+    if is_rlds(name):
+        return "rlds"
     lower = name.lower()
     for suffixes, fmt in _FILE_SUFFIXES:
         if lower.endswith(suffixes):
@@ -108,6 +112,9 @@ def open_source(path: Path, fmt: str | None, params: dict | None, engine) -> Sou
     if fmt == "webdataset":
         from .wds_src import WebDatasetSource
         return WebDatasetSource(path, params, engine)
+    if fmt == "rlds":
+        from .rlds_src import RLDSSource
+        return RLDSSource(path, params, engine)
     raise SourceError(f"不支持的格式：{fmt}")
 
 

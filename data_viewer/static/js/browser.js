@@ -2,8 +2,8 @@
 import { get } from './api.js';
 import { clear, el, errorBox, fmtBytes, icon, spinner } from './util.js';
 
-const FORMAT_SHORT = { lance: 'LANCE', parquet: 'PARQUET', csv: 'CSV', json: 'JSON', arrow: 'ARROW', hdf5: 'HDF5', webdataset: 'WDS' };
-const FORMAT_LABEL = { lance: 'Lance', parquet: 'Parquet', csv: 'CSV', json: 'JSON', arrow: 'Arrow', hdf5: 'HDF5', webdataset: 'WebDataset' };
+const FORMAT_SHORT = { lance: 'LANCE', parquet: 'PARQUET', csv: 'CSV', json: 'JSON', arrow: 'ARROW', hdf5: 'HDF5', webdataset: 'WDS', rlds: 'RLDS' };
+const FORMAT_LABEL = { lance: 'Lance', parquet: 'Parquet', csv: 'CSV', json: 'JSON', arrow: 'Arrow', hdf5: 'HDF5', webdataset: 'WebDataset', rlds: 'RLDS / TFRecord' };
 
 export class FileBrowser {
   constructor({ list, filter, banner, foot, onOpen, onNavigate, onPreview }) {

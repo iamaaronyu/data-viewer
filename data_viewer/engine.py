@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import threading
+import os
 import time
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Iterator
@@ -43,6 +44,8 @@ def validate_select(sql: str) -> tuple[str, bool]:
 class Engine:
     def __init__(self, threads: int | None = None, memory_limit: str | None = None):
         config: dict[str, object] = {"python_enable_replacements": False, "TimeZone": "UTC"}
+        if os.environ.get("DATA_VIEWER_DUCKDB_EXTENSIONS"):
+            config["extension_directory"] = os.environ["DATA_VIEWER_DUCKDB_EXTENSIONS"]
         if threads:
             config["threads"] = threads
         if memory_limit:
