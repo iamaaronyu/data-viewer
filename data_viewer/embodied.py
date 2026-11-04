@@ -30,6 +30,8 @@ def supports_trajectory(path, fmt, columns):
     if fmt == 'hdf5':
         with h5py.File(path,'r',locking=False) as f:
             if 'transforms' in f or 'actions' in f or 'action' in f: return True
+            if 'puppet/joint_position' in f and 'observations/rgb_images' in f:
+                return isinstance(f['puppet/joint_position'],h5py.Dataset) and f['puppet/joint_position'].ndim == 2
             if 'data' in f and isinstance(f['data'],h5py.Group):
                 return any(isinstance(g,h5py.Group) and ('actions' in g or 'action' in g) for g in f['data'].values())
     return False

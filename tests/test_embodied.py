@@ -136,3 +136,14 @@ def test_unified_views_and_legacy_redirect(robotics):
         assert h.json()['views']==['trajectory']
         e=c.get('/api/embodied/episode',params={'path':'libero.hdf5','episode':1})
         assert e.status_code==200 and e.json()['length']==5
+
+
+def test_robomind_puppet_layout_exposes_trajectory(tmp_path):
+    with h5py.File(tmp_path/'robomind.hdf5','w') as f:
+        f['puppet/joint_position']=np.zeros((5,8))
+        f['observations/rgb_images/camera_top']=np.zeros((5,16,20,3),dtype='u1')
+    with TestClient(create_app(AppConfig(root=tmp_path)),base_url='http://127.0.0.1:8765') as c:
+        r=c.post('/api/open',json={'path':'robomind.hdf5'})
+        assert r.status_code==200 and r.json()['views']==['trajectory']
+        e=c.get('/api/embodied/episode',params={'path':'robomind.hdf5'}).json()
+        assert e['length']==5 and e['cameras']==['observations/rgb_images/camera_top']
