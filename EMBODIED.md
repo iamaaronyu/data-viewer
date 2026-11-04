@@ -52,4 +52,3 @@ ssh -N -L 8765:127.0.0.1:8765 user@server
 浏览器打开 `http://127.0.0.1:8765/`。数据目录由启动参数指定，验证报告保存在 `--output` 指定的位置。
 
 部署为systemd服务时，可使用 `systemctl status <service-name>` 查看状态，使用 `journalctl -u <service-name>` 查看日志。
-

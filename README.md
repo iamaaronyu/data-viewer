@@ -13,6 +13,7 @@
 | Arrow / Feather | `.arrow` `.feather` `.ipc` `.arrows` | IPC 文件、IPC 流、Feather V1/V2，内存映射读取 |
 | HDF5 | `.h5` `.hdf5` `.h5ad` `.nc` | 任意组或数据集都能作为表格打开：复合类型拆成列，宽二维数组变成向量列，三维以上数组按行显示（像图像的直接渲染成缩略图） |
 | WebDataset | `.tar` 分片或分片目录 | 同一 key 的文件组成一个样本（`000001.jpg` + `000001.json` …）；后台索引全部分片 |
+| RLDS / TFRecord | `.tfrecord` 或 TFDS 分片文件 | 按 episode 读取观测、动作与图像，检查 CRC32C，按元数据恢复形状与类型 |
 
 ## 功能
 
@@ -21,6 +22,7 @@
 - **统计**：一次扫描得到所有列的非空率、唯一值、范围、分位数；每列的数值 / 时间分布直方图、出现最多的值、字符串长度、二进制大小与内容类型、向量范数分布。可以只统计当前筛选结果或前 10 万行。
 - **SQL**：对当前数据写只读 DuckDB 查询，表名固定为 `data`；提供按当前列生成的示例（分组计数、分位数、向量余弦相似度检索、展开嵌套字段等）和历史记录。
 - **信息**：各格式的专属信息，如 Lance 的版本 / 标签 / 索引，Parquet 的压缩与 Row Group，HDF5 的文件结构树和属性，WebDataset 的分片与字段统计。
+- **轨迹**：识别具身 episode 结构后，在同一数据页面显示轨迹标签，支持多相机画面、动作曲线、逐帧数值和 episode 切换；普通数据保留原有视图。支持 RLDS、HDF5 和 LeRobot Parquet，详见 [具身数据适配说明](EMBODIED.md)。
 - **媒体预览**：
   - 二进制列按文件头识别 PNG / JPEG / GIF / WebP / BMP / TIFF / AVIF / SVG、WAV / MP3 / FLAC / OGG / AAC / M4A、MP4 / WebM / MOV、PDF、NPY；
   - 字符串列里的本地媒体路径（相对数据集目录或根目录）直接显示缩略图，远程 URL 只在点击后加载；
@@ -83,6 +85,7 @@ UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple uv pip install --python .v
 - 压缩的 WebDataset 分片（`.tar.gz` 等）随机读取较慢；建议使用未压缩的 `.tar`。
 - HEIC 图片无法预览；视频能否播放取决于浏览器的解码能力（MP4 / WebM 最稳妥）。
 - 大于 1M 行的数据，唯一值是 HyperLogLog 估计值（界面上标为“≈”）。
+- DuckDB 暂时锁定在 1.x：DuckDB 2.0 会把二进制列、定长向量列和结构体子字段上的过滤条件下推给 Lance，而 Lance 不支持这类下推，查询会直接报错。
 
 ## 开发
 

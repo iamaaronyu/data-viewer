@@ -12,6 +12,8 @@ license = { text = "MIT" }
 dependencies = [
     "fastapi>=0.115",
     "uvicorn>=0.30",
+    # DuckDB 2.0 pushes filters on binary / fixed-size-list / nested struct columns into
+    # Lance (and other Arrow) scans, which then fail; stay on 1.x until that is handled.
     "duckdb>=1.1,<2",
     "pyarrow>=17",
     "pylance>=0.20",
